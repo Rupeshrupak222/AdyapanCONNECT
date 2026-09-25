@@ -13,11 +13,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // Wait for zustand persist to finish rehydrating from localStorage before deciding
   // to redirect, otherwise a logged-in user gets bounced to /login on refresh.
-  const [hydrated, setHydrated] = useState(() => useAuthStore.persist.hasHydrated());
+  const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
-    const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
+    const persist = useAuthStore.persist;
+    if (!persist) { setHydrated(true); return; }
+    const unsub = persist.onFinishHydration(() => setHydrated(true));
     // In case hydration already completed before this effect ran.
-    if (useAuthStore.persist.hasHydrated()) setHydrated(true);
+    if (persist.hasHydrated()) setHydrated(true);
     return unsub;
   }, []);
 

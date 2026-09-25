@@ -23,7 +23,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const { toast } = useToast();
   const { user, isAuthenticated, clearAuth, updateUser } = useAuthStore();
-  const [hydrated, setHydrated] = useState(() => useAuthStore.persist.hasHydrated());
+  const [hydrated, setHydrated] = useState(false);
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -39,8 +39,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const unreadCount = unread?.count ?? 0;
 
   useEffect(() => {
-    const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
-    if (useAuthStore.persist.hasHydrated()) setHydrated(true);
+    const persist = useAuthStore.persist;
+    if (!persist) { setHydrated(true); return; }
+    const unsub = persist.onFinishHydration(() => setHydrated(true));
+    if (persist.hasHydrated()) setHydrated(true);
     return unsub;
   }, []);
 

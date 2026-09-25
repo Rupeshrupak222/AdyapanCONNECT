@@ -12,7 +12,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "db:generate": "turbo run db:generate",
     "db:migrate": "turbo run db:migrate",
-    "db:seed": "turbo run db:seed"
+    "db:seed": "turbo run db:seed",
+    "render:build": "pnpm --filter @adyapan/database run db:generate && pnpm --filter @adyapan/api build"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",

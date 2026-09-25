@@ -1,0 +1,13 @@
+{
+  "name": "@adyapan/logger",
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "pino": "^8.18.0",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

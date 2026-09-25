@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Green & White theme */
+    --background: 0 0% 100%;
+    --foreground: 142 76% 9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 142 76% 9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 142 76% 9%;
+
+    --primary: 142 72% 29%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 142 76% 95%;
+    --secondary-foreground: 142 72% 29%;
+
+    --muted: 142 30% 96%;
+    --muted-foreground: 142 20% 45%;
+
+    --accent: 142 76% 92%;
+    --accent-foreground: 142 72% 29%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 142 30% 90%;
+    --input: 142 30% 90%;
+    --ring: 142 72% 29%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 142 40% 4%;
+    --foreground: 142 10% 95%;
+
+    --card: 142 30% 7%;
+    --card-foreground: 142 10% 95%;
+
+    --popover: 142 30% 7%;
+    --popover-foreground: 142 10% 95%;
+
+    --primary: 142 72% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 142 30% 12%;
+    --secondary-foreground: 142 10% 90%;
+
+    --muted: 142 20% 12%;
+    --muted-foreground: 142 10% 60%;
+
+    --accent: 142 30% 15%;
+    --accent-foreground: 142 10% 90%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 142 20% 15%;
+    --input: 142 20% 15%;
+    --ring: 142 72% 45%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground; font-feature-settings: "rlig" 1, "calt" 1; }
+  h1, h2, h3, h4, h5, h6 { @apply font-semibold tracking-tight; }
+}
+
+@layer utilities {
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .text-balance { text-wrap: balance; }
+}

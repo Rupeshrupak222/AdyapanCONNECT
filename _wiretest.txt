@@ -1,0 +1,9 @@
+﻿LOGIN ok tenant=test-biz
+AI AGENT: created, list count=1
+WORKFLOW: created, list count=1
+API KEY: rawReturned=True prefix=ac_20fa9
+CHATBOT: created
+PLANS: count=4
+RECHARGE: balance=1000
+FAILED: The remote server returned an error: (500) Internal Server Error.
+{"success":false,"error":{"code":"INTERNAL_ERROR","message":"\nInvalid `this.prisma.lead.create()` invocation in\nE:\\CONNECT\\adyapan-connect\\apps\\api\\dist\\modules\\crm\\crm.service.js:36:33\n\n  33     return (0, pagination_1.buildPaginatedResponse)(items, total, q);\n  34 }\n  35 async createLead(tenantId, dto) {\n→ 36     return this.prisma.lead.create({\n           data: {\n             tenantId: \"cmufh3xg10002mhhxons1lqi0\",\n             title: \"Website enquiry\",\n             source: \"WhatsApp\",\n             status: \"NEW\",\n             value: 5000,\n         +   tenant: {\n         +     create: TenantCreateWithoutLeadsInput | TenantUncheckedCreateWithoutLeadsInput,\n         +     connectOrCreate: TenantCreateOrConnectWithoutLeadsInput,\n         +     connect: TenantWhereUniqueInput\n         +   }\n           }\n         })\n\nArgument `tenant` is missing."},"requestId":"b2b73580-5450-4926-857e-edb614a4a70d","timestamp":"2026-09-24T19:18:29.067Z","path":"/api/v1/crm/leads"}

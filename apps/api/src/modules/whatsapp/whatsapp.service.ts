@@ -280,8 +280,8 @@ export class WhatsAppService {
   // ─── Webhook verification ────────────────────────────────────────────────────
 
   verifyWebhook(mode: string, token: string, challenge: string): string | false {
-    const verifyToken = this.config.get('META_VERIFY_TOKEN');
-    if (mode === 'subscribe' && token === verifyToken) {
+    const verifyToken = this.config.get('META_VERIFY_TOKEN') || this.config.get('WHATSAPP_VERIFY_TOKEN');
+    if (mode === 'subscribe' && verifyToken && token === verifyToken) {
       return challenge;
     }
     return false;

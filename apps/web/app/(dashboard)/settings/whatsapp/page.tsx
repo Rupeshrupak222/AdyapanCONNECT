@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { MessageCircle, Plus, X, Loader2, CheckCircle2, ShieldCheck, Phone, Zap } from 'lucide-react';
+import { MessageCircle, Plus, X, Loader2, CheckCircle2, ShieldCheck, Phone, Zap, Trash2 } from 'lucide-react';
 import { DashboardPageScaffold } from '@/components/dashboard/page-scaffold';
 import { useToast } from '@/hooks/use-toast';
 import api from '@/lib/api';
@@ -32,6 +32,17 @@ export default function WhatsAppSettingsPage() {
   });
   const numbers: Number[] = Array.isArray(data) ? data : [];
 
+  const deleteMut = useMutation({
+    mutationFn: async (id: string) => (await api.delete(`/whatsapp/numbers/${id}`)).data,
+    onSuccess: () => {
+      toast({ title: 'Number disconnected' });
+      qc.invalidateQueries({ queryKey: ['wa-numbers-settings'] });
+      qc.invalidateQueries({ queryKey: ['wa-numbers-topbar'] });
+      qc.invalidateQueries({ queryKey: ['wa-numbers'] });
+    },
+    onError: (e: any) => toast({ title: 'Failed to disconnect', description: e.response?.data?.error?.message || 'Error', variant: 'destructive' }),
+  });
+
   // Embedded signup (BSP) — real Meta popup
   const startEmbedded = async () => {
     setConnecting(true);
@@ -40,6 +51,8 @@ export default function WhatsAppSettingsPage() {
       await api.post('/whatsapp/embedded-signup', result);
       toast({ title: 'WhatsApp connected!', description: 'Your number is now live on Adyapan Connect.' });
       qc.invalidateQueries({ queryKey: ['wa-numbers-settings'] });
+      qc.invalidateQueries({ queryKey: ['wa-numbers-topbar'] });
+      qc.invalidateQueries({ queryKey: ['wa-numbers'] });
     } catch (e: any) {
       toast({ title: 'Could not connect', description: e.response?.data?.error?.message || e.message || 'Try again', variant: 'destructive' });
     } finally {
@@ -54,13 +67,20 @@ export default function WhatsAppSettingsPage() {
       setShowManual(false);
       setManual({ wabaId: '', phoneNumberId: '', displayPhoneNumber: '', accessToken: '', businessName: '' });
       qc.invalidateQueries({ queryKey: ['wa-numbers-settings'] });
+      qc.invalidateQueries({ queryKey: ['wa-numbers-topbar'] });
+      qc.invalidateQueries({ queryKey: ['wa-numbers'] });
     },
     onError: (e: any) => toast({ title: 'Connect failed', description: e.response?.data?.error?.message || 'Check the details and token.', variant: 'destructive' }),
   });
 
   const sandboxMut = useMutation({
     mutationFn: async () => (await api.post('/whatsapp/sandbox')).data.data,
-    onSuccess: () => { toast({ title: 'Test number connected' }); qc.invalidateQueries({ queryKey: ['wa-numbers-settings'] }); },
+    onSuccess: () => {
+      toast({ title: 'Test number connected' });
+      qc.invalidateQueries({ queryKey: ['wa-numbers-settings'] });
+      qc.invalidateQueries({ queryKey: ['wa-numbers-topbar'] });
+      qc.invalidateQueries({ queryKey: ['wa-numbers'] });
+    },
   });
 
   const configured = isEmbeddedSignupConfigured();
@@ -91,9 +111,19 @@ export default function WhatsAppSettingsPage() {
                     <p className="text-xs text-gray-400">{n.verifiedName || n.businessName || n.waba?.name || 'WhatsApp Business'}</p>
                   </div>
                 </div>
-                <span className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${n.status === 'CONNECTED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                  {n.status === 'CONNECTED' && <CheckCircle2 className="h-3 w-3" />} {n.status}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${n.status === 'CONNECTED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                    {n.status === 'CONNECTED' && <CheckCircle2 className="h-3 w-3" />} {n.status}
+                  </span>
+                  <button
+                    onClick={() => deleteMut.mutate(n.id)}
+                    disabled={deleteMut.isPending}
+                    title="Disconnect number"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>

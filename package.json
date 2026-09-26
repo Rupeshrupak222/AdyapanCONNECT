@@ -29,7 +29,8 @@
   "packageManager": "pnpm@8.14.1",
   "pnpm": {
     "neverBuiltDependencies": [
-      "@nestjs/core"
+      "@nestjs/core",
+      "argon2"
     ]
   }
 }

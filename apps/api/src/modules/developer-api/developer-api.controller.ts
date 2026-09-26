@@ -7,6 +7,7 @@ import { TenantId } from '../../common/decorators/tenant.decorator';
 import { CurrentUserId } from '../../common/decorators/user.decorator';
 import { RequirePermissions } from '../../common/decorators/permissions.decorator';
 import { DeveloperApiService } from './developer-api.service';
+import { CreateApiKeyDto } from './developer-api.dto';
 
 @ApiTags('Developer')
 @ApiBearerAuth('JWT')
@@ -21,7 +22,7 @@ export class DeveloperApiController {
 
   @Post('api-keys')
   @RequirePermissions('developer.api.create')
-  createKey(@TenantId() tenantId: string, @CurrentUserId() userId: string, @Body() dto: any) {
+  createKey(@TenantId() tenantId: string, @CurrentUserId() userId: string, @Body() dto: CreateApiKeyDto) {
     return this.service.createApiKey(tenantId, userId, dto);
   }
 

@@ -3,8 +3,21 @@ import * as crypto from 'crypto';
 const ALGORITHM = 'aes-256-gcm';
 
 function getKey(): Buffer {
-  const key = process.env.ENCRYPTION_KEY || 'default-32-char-encryption-key!!';
-  return Buffer.from(key.padEnd(32).slice(0, 32), 'utf8');
+  const key = process.env.ENCRYPTION_KEY;
+  if (!key) {
+    throw new Error(
+      'ENCRYPTION_KEY is not set. Refusing to encrypt/decrypt with an insecure default.',
+    );
+  }
+  // Accept a 64-char hex key (32 bytes) or a raw 32-byte utf8 key.
+  if (/^[0-9a-fA-F]{64}$/.test(key)) {
+    return Buffer.from(key, 'hex');
+  }
+  const buf = Buffer.from(key, 'utf8');
+  if (buf.length < 32) {
+    throw new Error('ENCRYPTION_KEY must be at least 32 bytes (or a 64-char hex string).');
+  }
+  return buf.subarray(0, 32);
 }
 
 export function encrypt(text: string): string {

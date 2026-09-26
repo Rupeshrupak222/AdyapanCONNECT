@@ -6,6 +6,7 @@ import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { TenantId } from '../../common/decorators/tenant.decorator';
 import { RequirePermissions } from '../../common/decorators/permissions.decorator';
 import { TemplatesService } from './templates.service';
+import { CreateTemplateDto } from './templates.dto';
 
 @ApiTags('Templates')
 @ApiBearerAuth('JWT')
@@ -28,7 +29,7 @@ export class TemplatesController {
 
   @Post()
   @RequirePermissions('template.create')
-  create(@TenantId() tenantId: string, @Body() dto: any) {
+  create(@TenantId() tenantId: string, @Body() dto: CreateTemplateDto) {
     return this.templatesService.create(tenantId, dto);
   }
 

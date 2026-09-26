@@ -7,6 +7,7 @@ import { TenantId } from '../../common/decorators/tenant.decorator';
 import { CurrentUserId } from '../../common/decorators/user.decorator';
 import { RequirePermissions } from '../../common/decorators/permissions.decorator';
 import { WorkflowsService } from './workflows.service';
+import { CreateWorkflowDto, UpdateWorkflowDto } from './workflows.dto';
 
 @ApiTags('Workflows')
 @ApiBearerAuth('JWT')
@@ -21,13 +22,13 @@ export class WorkflowsController {
 
   @Post()
   @RequirePermissions('workflow.create')
-  create(@TenantId() tenantId: string, @CurrentUserId() userId: string, @Body() dto: any) {
+  create(@TenantId() tenantId: string, @CurrentUserId() userId: string, @Body() dto: CreateWorkflowDto) {
     return this.workflowsService.create(tenantId, userId, dto);
   }
 
   @Put(':id')
   @RequirePermissions('workflow.edit')
-  update(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: any) {
+  update(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: UpdateWorkflowDto) {
     return this.workflowsService.update(tenantId, id, dto);
   }
 

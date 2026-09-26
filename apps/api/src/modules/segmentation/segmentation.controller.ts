@@ -5,6 +5,7 @@ import { TenantGuard } from '../../common/guards/tenant.guard';
 import { TenantId } from '../../common/decorators/tenant.decorator';
 import { CurrentUserId } from '../../common/decorators/user.decorator';
 import { SegmentationService } from './segmentation.service';
+import { CreateSegmentDto } from './segmentation.dto';
 
 @ApiTags('Segmentation')
 @ApiBearerAuth('JWT')
@@ -17,7 +18,7 @@ export class SegmentationController {
   findAll(@TenantId() tenantId: string) { return this.segmentationService.findAll(tenantId); }
 
   @Post()
-  create(@TenantId() tenantId: string, @CurrentUserId() userId: string, @Body() dto: any) {
+  create(@TenantId() tenantId: string, @CurrentUserId() userId: string, @Body() dto: CreateSegmentDto) {
     return this.segmentationService.create(tenantId, userId, dto);
   }
 

@@ -5,6 +5,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { PrismaService } from '../../database/prisma.service';
 import { paginate, buildPaginatedResponse } from '../../common/utils/pagination';
+import { CreateCampaignDto, UpdateCampaignDto } from './campaigns.dto';
 
 @Injectable()
 export class CampaignsService {
@@ -54,7 +55,7 @@ export class CampaignsService {
     return campaign;
   }
 
-  async create(tenantId: string, userId: string, dto: any) {
+  async create(tenantId: string, userId: string, dto: CreateCampaignDto) {
     // Validate template exists and is approved
     const template = await this.prisma.whatsAppTemplate.findFirst({
       where: { id: dto.templateId, tenantId },
@@ -93,12 +94,19 @@ export class CampaignsService {
     });
   }
 
-  async update(tenantId: string, id: string, dto: any) {
+  async update(tenantId: string, id: string, dto: UpdateCampaignDto) {
     const campaign = await this.findOne(tenantId, id);
     if (!['DRAFT', 'SCHEDULED'].includes(campaign.status)) {
       throw new BadRequestException('Only draft or scheduled campaigns can be edited');
     }
-    return this.prisma.campaign.update({ where: { id }, data: dto });
+    const { scheduledAt, ...rest } = dto;
+    return this.prisma.campaign.update({
+      where: { id },
+      data: {
+        ...rest,
+        ...(scheduledAt !== undefined && { scheduledAt: scheduledAt ? new Date(scheduledAt) : null }),
+      },
+    });
   }
 
   async launch(tenantId: string, id: string, userId: string) {

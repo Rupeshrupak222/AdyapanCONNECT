@@ -7,6 +7,7 @@ import { TenantId } from '../../common/decorators/tenant.decorator';
 import { CurrentUserId } from '../../common/decorators/user.decorator';
 import { RequirePermissions } from '../../common/decorators/permissions.decorator';
 import { TenantsService } from './tenants.service';
+import { UpdateTenantDto } from './tenants.dto';
 
 @ApiTags('Tenants')
 @ApiBearerAuth('JWT')
@@ -21,7 +22,7 @@ export class TenantsController {
 
   @Put()
   @RequirePermissions('settings.manage')
-  update(@TenantId() tenantId: string, @Body() dto: any) { return this.tenantsService.update(tenantId, dto); }
+  update(@TenantId() tenantId: string, @Body() dto: UpdateTenantDto) { return this.tenantsService.update(tenantId, dto); }
 
   @Get('members')
   @RequirePermissions('team.manage')

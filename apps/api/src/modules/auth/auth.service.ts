@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as argon2 from 'argon2';
 import * as speakeasy from 'speakeasy';
+import * as crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../../database/prisma.service';
 import { MailService } from '../mail/mail.service';
@@ -226,8 +227,17 @@ export class AuthService {
       userId: user.id,
       message: 'Registration successful. Please verify your email.',
       // In dev (no SMTP), surface the OTP + link so the flow is testable end-to-end.
-      ...(devMode ? { devOtp: otp, devVerifyLink: link } : {}),
+      // Never expose these in production, regardless of SMTP configuration.
+      ...(this.isDevExposureAllowed(devMode) ? { devOtp: otp, devVerifyLink: link } : {}),
     };
+  }
+
+  /**
+   * Dev secrets (OTPs, reset links) may only be returned in API responses when
+   * the mail service is in dev mode AND we are not running in production.
+   */
+  private isDevExposureAllowed(devMode: boolean): boolean {
+    return devMode && process.env.NODE_ENV !== 'production';
   }
 
   async verifyEmail(email: string, otp: string) {
@@ -277,7 +287,7 @@ export class AuthService {
     const { link, devMode } = await this.mail.sendVerificationEmail(user.email, otp, user.id);
     return {
       message: 'Verification email sent.',
-      ...(devMode ? { devOtp: otp, devVerifyLink: link } : {}),
+      ...(this.isDevExposureAllowed(devMode) ? { devOtp: otp, devVerifyLink: link } : {}),
     };
   }
 
@@ -360,7 +370,7 @@ export class AuthService {
     }
 
     const session = await this.prisma.userSession.findUnique({
-      where: { refreshToken },
+      where: { refreshToken: this.hashToken(refreshToken) },
       include: {
         user: {
           include: {
@@ -393,7 +403,7 @@ export class AuthService {
   async logout(userId: string, refreshToken?: string) {
     if (refreshToken) {
       await this.prisma.userSession.updateMany({
-        where: { userId, refreshToken },
+        where: { userId, refreshToken: this.hashToken(refreshToken) },
         data: { revokedAt: new Date() },
       });
     }
@@ -421,8 +431,8 @@ export class AuthService {
 
     const { link, devMode } = await this.mail.sendPasswordResetEmail(user.email, token);
     this.logger.log(`Password reset email sent for user ${user.id}`);
-    // In dev (no SMTP) return the link so the flow is testable; controller decides whether to expose it.
-    return devMode ? { devResetLink: link } : {};
+    // In dev (no SMTP) return the link so the flow is testable; never in production.
+    return this.isDevExposureAllowed(devMode) ? { devResetLink: link } : {};
   }
 
   async resetPassword(token: string, newPassword: string) {
@@ -471,6 +481,14 @@ export class AuthService {
     });
 
     return { backupCodes };
+  }
+
+  /**
+   * Refresh tokens are stored hashed at rest so a leak of the sessions table
+   * does not expose usable tokens. The raw JWT is only ever held by the client.
+   */
+  private hashToken(token: string): string {
+    return crypto.createHash('sha256').update(token).digest('hex');
   }
 
   private async generateTokens(
@@ -522,7 +540,7 @@ export class AuthService {
     await this.prisma.userSession.create({
       data: {
         userId: user.id,
-        refreshToken,
+        refreshToken: this.hashToken(refreshToken),
         ipAddress: ip,
         userAgent,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),

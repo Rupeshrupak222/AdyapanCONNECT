@@ -7,6 +7,7 @@ import { TenantId } from '../../common/decorators/tenant.decorator';
 import { RequirePermissions } from '../../common/decorators/permissions.decorator';
 import { Public } from '../../common/decorators/permissions.decorator';
 import { BillingService } from './billing.service';
+import { VerifyPaymentDto } from './billing.dto';
 
 @ApiTags('Billing')
 @Controller('billing')
@@ -76,7 +77,7 @@ export class BillingController {
   @UseGuards(JwtAuthGuard, TenantGuard, PermissionsGuard)
   @Post('verify-payment')
   @RequirePermissions('billing.manage')
-  verifyPayment(@TenantId() tenantId: string, @Body() dto: any) {
+  verifyPayment(@TenantId() tenantId: string, @Body() dto: VerifyPaymentDto) {
     return this.billingService.verifyPayment(tenantId, dto);
   }
 }

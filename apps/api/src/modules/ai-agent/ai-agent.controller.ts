@@ -7,6 +7,7 @@ import { TenantId } from '../../common/decorators/tenant.decorator';
 import { CurrentUserId } from '../../common/decorators/user.decorator';
 import { RequirePermissions } from '../../common/decorators/permissions.decorator';
 import { AiAgentService } from './ai-agent.service';
+import { CreateAgentDto, UpdateAgentDto, CreateKnowledgeBaseDto, AddDocumentDto } from './ai-agent.dto';
 
 @ApiTags('AI Agent')
 @ApiBearerAuth('JWT')
@@ -21,13 +22,13 @@ export class AiAgentController {
 
   @Post('agents')
   @RequirePermissions('ai_agent.create')
-  create(@TenantId() tenantId: string, @CurrentUserId() userId: string, @Body() dto: any) {
+  create(@TenantId() tenantId: string, @CurrentUserId() userId: string, @Body() dto: CreateAgentDto) {
     return this.aiAgentService.create(tenantId, userId, dto);
   }
 
   @Put('agents/:id')
   @RequirePermissions('ai_agent.edit')
-  update(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: any) {
+  update(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: UpdateAgentDto) {
     return this.aiAgentService.update(tenantId, id, dto);
   }
 
@@ -49,13 +50,13 @@ export class AiAgentController {
 
   @Post('knowledge-bases')
   @RequirePermissions('ai_agent.create')
-  createKnowledgeBase(@TenantId() tenantId: string, @CurrentUserId() userId: string, @Body() dto: any) {
+  createKnowledgeBase(@TenantId() tenantId: string, @CurrentUserId() userId: string, @Body() dto: CreateKnowledgeBaseDto) {
     return this.aiAgentService.createKnowledgeBase(tenantId, userId, dto);
   }
 
   @Post('knowledge-bases/:id/documents')
   @RequirePermissions('ai_agent.create')
-  addDocument(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: any) {
+  addDocument(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: AddDocumentDto) {
     return this.aiAgentService.addDocument(tenantId, id, dto);
   }
 }

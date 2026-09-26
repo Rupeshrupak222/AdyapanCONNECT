@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { paginate, buildPaginatedResponse } from '../../common/utils/pagination';
+import {
+  CreateLeadDto, UpdateLeadDto, CreateDealDto, UpdateDealDto,
+  CreatePipelineDto, CreateTaskDto, UpdateTaskDto,
+} from './crm.dto';
 
 @Injectable()
 export class CrmService {
@@ -23,11 +27,11 @@ export class CrmService {
     return buildPaginatedResponse(items, total, q);
   }
 
-  async createLead(tenantId: string, dto: any) {
+  async createLead(tenantId: string, dto: CreateLeadDto) {
     return this.prisma.lead.create({ data: { tenantId, ...dto } });
   }
 
-  async updateLead(tenantId: string, id: string, dto: any) {
+  async updateLead(tenantId: string, id: string, dto: UpdateLeadDto) {
     return this.prisma.lead.updateMany({ where: { id, tenantId }, data: dto });
   }
 
@@ -44,11 +48,11 @@ export class CrmService {
     });
   }
 
-  async createDeal(tenantId: string, dto: any) {
+  async createDeal(tenantId: string, dto: CreateDealDto) {
     return this.prisma.deal.create({ data: { tenantId, ...dto } });
   }
 
-  async updateDeal(tenantId: string, id: string, dto: any) {
+  async updateDeal(tenantId: string, id: string, dto: UpdateDealDto) {
     return this.prisma.deal.updateMany({ where: { id, tenantId }, data: dto });
   }
 
@@ -60,7 +64,7 @@ export class CrmService {
     });
   }
 
-  async createPipeline(tenantId: string, dto: { name: string; stages: { name: string; order: number; color?: string; probability: number }[] }) {
+  async createPipeline(tenantId: string, dto: CreatePipelineDto) {
     return this.prisma.pipeline.create({
       data: {
         tenantId,
@@ -82,11 +86,11 @@ export class CrmService {
     return buildPaginatedResponse(items, total, q);
   }
 
-  async createTask(tenantId: string, dto: any) {
+  async createTask(tenantId: string, dto: CreateTaskDto) {
     return this.prisma.task.create({ data: { tenantId, ...dto } });
   }
 
-  async updateTask(tenantId: string, id: string, dto: any) {
+  async updateTask(tenantId: string, id: string, dto: UpdateTaskDto) {
     return this.prisma.task.updateMany({ where: { id, tenantId }, data: dto });
   }
 }

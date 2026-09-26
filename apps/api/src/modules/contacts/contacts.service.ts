@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { paginate, buildPaginatedResponse } from '../../common/utils/pagination';
+import { CreateContactDto, UpdateContactDto, BulkImportItemDto } from './contacts.dto';
 
 @Injectable()
 export class ContactsService {
@@ -52,7 +53,7 @@ export class ContactsService {
     return contact;
   }
 
-  async create(tenantId: string, dto: any) {
+  async create(tenantId: string, dto: CreateContactDto) {
     const existing = await this.prisma.contact.findFirst({
       where: { tenantId, phoneNumber: dto.phoneNumber, deletedAt: null },
     });
@@ -76,7 +77,7 @@ export class ContactsService {
     });
   }
 
-  async update(tenantId: string, id: string, dto: any) {
+  async update(tenantId: string, id: string, dto: UpdateContactDto) {
     await this.prisma.contact.findFirstOrThrow({ where: { id, tenantId, deletedAt: null } });
     return this.prisma.contact.update({ where: { id }, data: dto });
   }
@@ -109,7 +110,7 @@ export class ContactsService {
     });
   }
 
-  async bulkImport(tenantId: string, contacts: any[]) {
+  async bulkImport(tenantId: string, contacts: BulkImportItemDto[]) {
     let created = 0; let skipped = 0; let failed = 0;
 
     for (const c of contacts) {

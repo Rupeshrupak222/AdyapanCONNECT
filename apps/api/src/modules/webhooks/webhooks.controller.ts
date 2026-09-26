@@ -7,6 +7,7 @@ import { TenantId } from '../../common/decorators/tenant.decorator';
 import { CurrentUserId } from '../../common/decorators/user.decorator';
 import { RequirePermissions } from '../../common/decorators/permissions.decorator';
 import { WebhooksService } from './webhooks.service';
+import { CreateWebhookDto } from './webhooks.dto';
 
 @ApiTags('Webhooks')
 @ApiBearerAuth('JWT')
@@ -21,7 +22,7 @@ export class WebhooksController {
 
   @Post()
   @RequirePermissions('developer.webhook.manage')
-  create(@TenantId() tenantId: string, @CurrentUserId() userId: string, @Body() dto: any) {
+  create(@TenantId() tenantId: string, @CurrentUserId() userId: string, @Body() dto: CreateWebhookDto) {
     return this.webhooksService.create(tenantId, userId, dto);
   }
 

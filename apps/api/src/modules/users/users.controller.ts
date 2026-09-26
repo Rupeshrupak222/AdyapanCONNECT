@@ -4,6 +4,7 @@ import { IsString, MinLength } from 'class-validator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUserId } from '../../common/decorators/user.decorator';
 import { UsersService } from './users.service';
+import { UpdateProfileDto } from './users.dto';
 
 class ChangePasswordDto {
   @IsString()
@@ -25,7 +26,7 @@ export class UsersController {
   getMe(@CurrentUserId() userId: string) { return this.usersService.findById(userId); }
 
   @Put('me')
-  updateProfile(@CurrentUserId() userId: string, @Body() dto: any) {
+  updateProfile(@CurrentUserId() userId: string, @Body() dto: UpdateProfileDto) {
     return this.usersService.updateProfile(userId, dto);
   }
 

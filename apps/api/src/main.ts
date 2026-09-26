@@ -8,27 +8,36 @@ import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware';
+import { validateEnv } from './config/env.validation';
 
 async function bootstrap() {
+  // Fail fast on missing/weak secrets before any traffic is served.
+  validateEnv();
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'log', 'debug'],
   });
 
-  // Security headers
+  // Security headers. In production we drop 'unsafe-inline' from styleSrc for a
+  // stricter CSP; in dev it is allowed so the Swagger UI renders correctly.
+  const isProduction = process.env.NODE_ENV === 'production';
   app.use(helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: isProduction ? ["'self'"] : ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", 'data:', 'https:'],
         scriptSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        baseUri: ["'self'"],
       },
     },
     crossOriginEmbedderPolicy: false,
   }));
 
-  // Cookie parser
-  app.use(cookieParser(process.env.COOKIE_SECRET || 'cookie-secret'));
+  // Cookie parser (COOKIE_SECRET is enforced by validateEnv above)
+  app.use(cookieParser(process.env.COOKIE_SECRET));
 
   // CORS
   app.enableCors({

@@ -3,6 +3,7 @@ import {
   HttpCode, HttpStatus, Res, BadRequestException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { Throttle } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import {
   IsEmail, IsString, IsNotEmpty, IsOptional, IsBoolean,
@@ -117,6 +118,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a new user and business' })
@@ -125,6 +127,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login with email and password' })
@@ -134,6 +137,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post('login/2fa')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Complete login with 2FA code' })
@@ -142,6 +146,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh access token' })
@@ -170,6 +175,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Request password reset email' })
@@ -179,6 +185,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Reset password with token' })
@@ -191,6 +198,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post('verify-email')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Verify email with OTP code' })
@@ -199,6 +207,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
   @Post('resend-verification')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Resend email verification code' })
@@ -244,8 +253,26 @@ export class AuthController {
     const appUrl = process.env.APP_URL || 'http://localhost:3000';
     try {
       const tokens = await this.authService.handleOAuthLogin(req.user as any, req.ip, req.headers['user-agent']);
-      const payload = encodeURIComponent(Buffer.from(JSON.stringify(tokens)).toString('base64'));
-      return res.redirect(`${appUrl}/auth/callback?data=${payload}`);
+      const isProd = process.env.NODE_ENV === 'production';
+
+      // SECURITY: never place tokens in the redirect URL (they leak into browser
+      // history, referrer headers, and proxy/server logs). Deliver them via
+      // httpOnly cookies instead; the frontend callback reads them server-side.
+      const baseCookie = {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'lax' as const,
+        path: '/',
+      };
+      res.cookie('access_token', tokens.accessToken, {
+        ...baseCookie,
+        maxAge: (tokens.expiresIn ?? 15 * 60) * 1000,
+      });
+      res.cookie('refresh_token', tokens.refreshToken, {
+        ...baseCookie,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      return res.redirect(`${appUrl}/auth/callback`);
     } catch (e: any) {
       return res.redirect(`${appUrl}/login?error=${encodeURIComponent(e?.message || 'oauth_failed')}`);
     }

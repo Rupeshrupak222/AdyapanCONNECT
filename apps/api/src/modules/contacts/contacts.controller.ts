@@ -6,6 +6,7 @@ import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { TenantId } from '../../common/decorators/tenant.decorator';
 import { RequirePermissions } from '../../common/decorators/permissions.decorator';
 import { ContactsService } from './contacts.service';
+import { CreateContactDto, UpdateContactDto, BulkImportDto } from './contacts.dto';
 
 @ApiTags('Contacts')
 @ApiBearerAuth('JWT')
@@ -28,19 +29,19 @@ export class ContactsController {
 
   @Post()
   @RequirePermissions('contact.create')
-  create(@TenantId() tenantId: string, @Body() dto: any) {
+  create(@TenantId() tenantId: string, @Body() dto: CreateContactDto) {
     return this.contactsService.create(tenantId, dto);
   }
 
   @Post('import')
   @RequirePermissions('contact.import')
-  bulkImport(@TenantId() tenantId: string, @Body() dto: { contacts: any[] }) {
+  bulkImport(@TenantId() tenantId: string, @Body() dto: BulkImportDto) {
     return this.contactsService.bulkImport(tenantId, dto.contacts);
   }
 
   @Put(':id')
   @RequirePermissions('contact.edit')
-  update(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: any) {
+  update(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: UpdateContactDto) {
     return this.contactsService.update(tenantId, id, dto);
   }
 

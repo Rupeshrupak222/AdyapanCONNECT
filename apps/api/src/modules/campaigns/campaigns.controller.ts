@@ -7,6 +7,7 @@ import { TenantId } from '../../common/decorators/tenant.decorator';
 import { CurrentUserId } from '../../common/decorators/user.decorator';
 import { RequirePermissions } from '../../common/decorators/permissions.decorator';
 import { CampaignsService } from './campaigns.service';
+import { CreateCampaignDto, UpdateCampaignDto } from './campaigns.dto';
 
 @ApiTags('Campaigns')
 @ApiBearerAuth('JWT')
@@ -43,13 +44,13 @@ export class CampaignsController {
   @Post()
   @RequirePermissions('campaign.create')
   @ApiOperation({ summary: 'Create a new campaign' })
-  create(@TenantId() tenantId: string, @CurrentUserId() userId: string, @Body() dto: any) {
+  create(@TenantId() tenantId: string, @CurrentUserId() userId: string, @Body() dto: CreateCampaignDto) {
     return this.campaignsService.create(tenantId, userId, dto);
   }
 
   @Put(':id')
   @RequirePermissions('campaign.edit')
-  update(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: any) {
+  update(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: UpdateCampaignDto) {
     return this.campaignsService.update(tenantId, id, dto);
   }
 

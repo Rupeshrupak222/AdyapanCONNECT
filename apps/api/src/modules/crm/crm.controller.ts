@@ -6,6 +6,10 @@ import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { TenantId } from '../../common/decorators/tenant.decorator';
 import { RequirePermissions } from '../../common/decorators/permissions.decorator';
 import { CrmService } from './crm.service';
+import {
+  CreateLeadDto, UpdateLeadDto, CreateDealDto, UpdateDealDto,
+  CreatePipelineDto, CreateTaskDto, UpdateTaskDto,
+} from './crm.dto';
 
 @ApiTags('CRM')
 @ApiBearerAuth('JWT')
@@ -20,11 +24,11 @@ export class CrmController {
 
   @Post('leads')
   @RequirePermissions('crm.manage')
-  createLead(@TenantId() tenantId: string, @Body() dto: any) { return this.crmService.createLead(tenantId, dto); }
+  createLead(@TenantId() tenantId: string, @Body() dto: CreateLeadDto) { return this.crmService.createLead(tenantId, dto); }
 
   @Put('leads/:id')
   @RequirePermissions('crm.manage')
-  updateLead(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: any) { return this.crmService.updateLead(tenantId, id, dto); }
+  updateLead(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: UpdateLeadDto) { return this.crmService.updateLead(tenantId, id, dto); }
 
   @Get('deals')
   @RequirePermissions('crm.view')
@@ -32,11 +36,11 @@ export class CrmController {
 
   @Post('deals')
   @RequirePermissions('crm.manage')
-  createDeal(@TenantId() tenantId: string, @Body() dto: any) { return this.crmService.createDeal(tenantId, dto); }
+  createDeal(@TenantId() tenantId: string, @Body() dto: CreateDealDto) { return this.crmService.createDeal(tenantId, dto); }
 
   @Put('deals/:id')
   @RequirePermissions('crm.manage')
-  updateDeal(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: any) { return this.crmService.updateDeal(tenantId, id, dto); }
+  updateDeal(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: UpdateDealDto) { return this.crmService.updateDeal(tenantId, id, dto); }
 
   @Get('pipelines')
   @RequirePermissions('crm.view')
@@ -44,7 +48,7 @@ export class CrmController {
 
   @Post('pipelines')
   @RequirePermissions('crm.manage')
-  createPipeline(@TenantId() tenantId: string, @Body() dto: any) { return this.crmService.createPipeline(tenantId, dto); }
+  createPipeline(@TenantId() tenantId: string, @Body() dto: CreatePipelineDto) { return this.crmService.createPipeline(tenantId, dto); }
 
   @Get('tasks')
   @RequirePermissions('crm.view')
@@ -52,9 +56,9 @@ export class CrmController {
 
   @Post('tasks')
   @RequirePermissions('crm.manage')
-  createTask(@TenantId() tenantId: string, @Body() dto: any) { return this.crmService.createTask(tenantId, dto); }
+  createTask(@TenantId() tenantId: string, @Body() dto: CreateTaskDto) { return this.crmService.createTask(tenantId, dto); }
 
   @Put('tasks/:id')
   @RequirePermissions('crm.manage')
-  updateTask(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: any) { return this.crmService.updateTask(tenantId, id, dto); }
+  updateTask(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: UpdateTaskDto) { return this.crmService.updateTask(tenantId, id, dto); }
 }

@@ -77,13 +77,21 @@ export class BillingService {
     planId?: string;
     amount?: number;
   }) {
-    const secret = process.env.RAZORPAY_KEY_SECRET!;
+    const secret = process.env.RAZORPAY_KEY_SECRET;
+    if (!secret) throw new BadRequestException('Payments are not configured.');
     const expected = crypto
       .createHmac('sha256', secret)
       .update(`${input.razorpay_order_id}|${input.razorpay_payment_id}`)
       .digest('hex');
 
-    if (expected !== input.razorpay_signature) {
+    // Constant-time comparison to avoid signature timing side-channels.
+    const expectedBuf = Buffer.from(expected, 'utf8');
+    const providedBuf = Buffer.from(input.razorpay_signature || '', 'utf8');
+    const signatureValid =
+      expectedBuf.length === providedBuf.length &&
+      crypto.timingSafeEqual(expectedBuf, providedBuf);
+
+    if (!signatureValid) {
       this.logger.warn(`Invalid payment signature for tenant ${tenantId}`);
       throw new BadRequestException('Payment verification failed');
     }

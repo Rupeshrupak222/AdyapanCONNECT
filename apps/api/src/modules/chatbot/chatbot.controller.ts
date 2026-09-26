@@ -7,6 +7,7 @@ import { TenantId } from '../../common/decorators/tenant.decorator';
 import { CurrentUserId } from '../../common/decorators/user.decorator';
 import { RequirePermissions } from '../../common/decorators/permissions.decorator';
 import { ChatbotService } from './chatbot.service';
+import { CreateChatbotDto, UpdateChatbotDto, SaveFlowDto } from './chatbot.dto';
 
 @ApiTags('Chatbot')
 @ApiBearerAuth('JWT')
@@ -21,19 +22,19 @@ export class ChatbotController {
 
   @Post()
   @RequirePermissions('chatbot.create')
-  create(@TenantId() tenantId: string, @CurrentUserId() userId: string, @Body() dto: any) {
+  create(@TenantId() tenantId: string, @CurrentUserId() userId: string, @Body() dto: CreateChatbotDto) {
     return this.chatbotService.create(tenantId, userId, dto);
   }
 
   @Put(':id')
   @RequirePermissions('chatbot.edit')
-  update(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: any) {
+  update(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: UpdateChatbotDto) {
     return this.chatbotService.update(tenantId, id, dto);
   }
 
   @Post(':id/flow')
   @RequirePermissions('chatbot.edit')
-  saveFlow(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: any) {
+  saveFlow(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: SaveFlowDto) {
     return this.chatbotService.saveFlow(tenantId, id, dto);
   }
 

@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { Menu, Bell, LogOut, ChevronDown, RefreshCw, User, Settings, CreditCard, CheckCircle2, MessageSquare, Megaphone } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
 import { useUiStore } from '@/store/ui.store';
 import { getInitials } from '@/lib/utils';
@@ -25,6 +27,15 @@ export function TopBar() {
   const [unread, setUnread] = useState(true);
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  const { data: numbers } = useQuery({
+    queryKey: ['wa-numbers-topbar'],
+    queryFn: async () => (await api.get('/whatsapp/numbers')).data.data as any[],
+    retry: false,
+  });
+
+  const isLive = Array.isArray(numbers) && numbers.some(n => n.status === 'CONNECTED' && n.displayPhoneNumber !== 'Sandbox Business');
+  const isSandbox = Array.isArray(numbers) && numbers.some(n => n.displayPhoneNumber === 'Sandbox Business');
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -58,9 +69,19 @@ export function TopBar() {
       <div className="flex items-center gap-3 sm:gap-5">
         <div className="hidden items-center gap-1.5 text-xs lg:flex">
           <span className="text-gray-400">WhatsApp Business API Status :</span>
-          <span className="flex items-center gap-1 font-semibold text-green-600">
-            <span className="h-1.5 w-1.5 rounded-full bg-green-500" /> LIVE
-          </span>
+          {isLive ? (
+            <span className="flex items-center gap-1 font-semibold text-green-600">
+              <span className="h-1.5 w-1.5 rounded-full bg-green-500" /> LIVE
+            </span>
+          ) : isSandbox ? (
+            <span className="flex items-center gap-1 font-semibold text-amber-600">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> SANDBOX
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 font-semibold text-gray-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-gray-400" /> NOT CONNECTED
+            </span>
+          )}
         </div>
 
         <div className="hidden items-center gap-1.5 text-xs md:flex">

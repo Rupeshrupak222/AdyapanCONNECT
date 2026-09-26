@@ -54,11 +54,15 @@ export default function DashboardPage() {
     placeholderData: { meta: { total: 0 }, data: [] },
   });
 
-  const hasNumber = Array.isArray(numbers) && numbers.some((n: any) => n.status === 'CONNECTED');
+  const isLiveNumber = Array.isArray(numbers) && numbers.some((n: any) => n.status === 'CONNECTED' && n.displayPhoneNumber !== 'Sandbox Business');
+  const isSandboxNumber = Array.isArray(numbers) && numbers.some((n: any) => n.displayPhoneNumber === 'Sandbox Business');
+  const hasNumber = isLiveNumber || isSandboxNumber;
+
   const contactsCount = contactsData?.total ?? contactsData?.meta?.total ?? (contactsData?.items?.length || 0);
   const campaignsCount = campaignsData?.meta?.total ?? campaignsData?.total ?? (campaignsData?.data?.length || 0);
 
-
+  const apiStatusValue = isLiveNumber ? 'LIVE' : isSandboxNumber ? 'SANDBOX' : 'NOT CONNECTED';
+  const apiStatusClass = isLiveNumber ? 'bg-green-100 text-green-700' : isSandboxNumber ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600';
 
   const businessName =
     user?.tenantName ||
@@ -70,7 +74,7 @@ export default function DashboardPage() {
   const setupSteps = [
     { label: 'Create your account', done: true, href: '/settings', cta: 'View' },
     { label: 'Verify your email address', done: user?.emailVerified ?? false, href: `/verify-email${user?.email ? `?email=${encodeURIComponent(user.email)}` : ''}`, cta: 'Verify now' },
-    { label: 'Connect WhatsApp Business number', done: hasNumber, action: 'connect' as const, cta: 'Connect' },
+    { label: 'Connect WhatsApp Business number', done: isLiveNumber, action: 'connect' as const, cta: 'Connect' },
     { label: 'Import your first contacts', done: contactsCount > 0, href: '/contacts', cta: 'Import' },
     { label: 'Send your first broadcast', done: campaignsCount > 0, href: '/campaigns', cta: 'Create' },
   ];
@@ -89,7 +93,7 @@ export default function DashboardPage() {
       <div className="space-y-6 xl:col-span-2">
         {/* Status cards */}
         <div className="flex flex-col divide-y divide-gray-100 rounded-2xl border border-gray-100 bg-white shadow-sm sm:flex-row sm:divide-x sm:divide-y-0">
-          <StatusCard label="WhatsApp Business API Status" value="LIVE" badge valueClass="bg-green-100 text-green-700" />
+          <StatusCard label="WhatsApp Business API Status" value={apiStatusValue} badge valueClass={apiStatusClass} />
           <StatusCard label="Quality Rating" value={stats?.qualityRating || 'High'} badge valueClass="bg-green-100 text-green-700" />
           <StatusCard label="Remaining Quota" value={String(stats?.remainingQuota ?? 2000)} valueClass="text-green-600" />
         </div>

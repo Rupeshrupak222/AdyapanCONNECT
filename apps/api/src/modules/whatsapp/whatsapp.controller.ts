@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Body, UseGuards, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
@@ -35,6 +35,16 @@ export class WhatsAppController {
     return this.prisma.whatsAppPhoneNumber.findFirstOrThrow({
       where: { id, tenantId },
     });
+  }
+
+  @Delete('numbers/:id')
+  @RequirePermissions('whatsapp.connect')
+  @ApiOperation({ summary: 'Delete/Disconnect a WhatsApp number' })
+  async deleteNumber(@TenantId() tenantId: string, @Param('id') id: string) {
+    const num = await this.prisma.whatsAppPhoneNumber.findFirst({ where: { id, tenantId } });
+    if (!num) throw new BadRequestException('Number not found');
+    await this.prisma.whatsAppPhoneNumber.delete({ where: { id } });
+    return { success: true, id };
   }
 
   @Post('numbers/:id/sync')
